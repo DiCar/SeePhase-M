@@ -128,10 +128,10 @@ require(ggplot2)
 t <- Sys.time()
 timeStamp <-  strftime(t,"%Y-%m-%d_%H-%M-%S")
 
+dir.name <- paste(timeStamp, n_phase_data)
+dir.create(dir.name)
 
-dir.create(timeStamp)
-
-tPath <- paste0(timeStamp,"/")
+tPath <- paste0(dir.name,"/")
 
 
 
@@ -233,8 +233,8 @@ if (process_type == '2'){
   
   t_plot <- melt(table_averaged, id.vars = n_rh_vds, variable.name = 'series')
   #number <- names(e1)[i]
-  plotId <- "RH vs Temperature Plot"
-  g <- ggplot(t_plot, aes_string(n_rh_vds,"value")) + geom_point(aes(colour = series)) + ggtitle(plotId)+xlab('RH%')+ylab('Phase')
+  plotId <- paste(n_phase_data, "RH vs Temperature Plot")
+  g <- ggplot(t_plot, aes_string(n_rh_vds,"value")) + geom_point(aes(colour = series)) + ggtitle(plotId)+xlab('RH%')+ylab(n_phase_data)
   g
   print(g)
   ggplotname <- paste0(tPath,"plot_forRHvsT.png")
