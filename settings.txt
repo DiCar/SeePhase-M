@@ -1,33 +1,33 @@
-dataFilePath = '/Users/DiCar/Documents/IOS/R/modscript/PATCHCAL01/PATCHCAL03_160108T02/prc01_08_2016___03_42_32PM.csv'
-vdsFilePath = '/Users/DiCar/Documents/IOS/R/modscript/RH_Quick_Calbration_1_0_to_90p-2.txt' #let it be in the Tab Delimited format, must have two extra columns (include and Temp in columns O and P, respectively)
+dataFilePath = 'S:\R&D Docs\R&D Shared\3250 NASA NIOGS II\Data\MOGS v1 PN 001\MOGSv1_PN001_04_CO2\A01\prc09_02_2015___04_46_05PM.csv'
+vdsFilePath = 'S:\R&D Docs\R&D Shared\3250 NASA NIOGS II\Data\For Marvin\CO2\eliminateTrueCO2-2.txt' #let it be in the Tab Delimited format, must have two extra columns (include and Temp in columns O and P, respectively)
 humidityFilePath = ''
 
 #data refers to the raw file from seephase
 
-seePhase.time = 1 #this is the first column for the SeePhase
-seePhase.temperature = 17 #this is the column for the 'AnalogB' column for CO2
-seePhase.phase = 8 #this is the column for the value of interest for CO2
+time_data = 1 #this is the first column for the SeePhase
+temp_data = 17 #this is the column for the 'AnalogB' column for CO2
+phase_data = 8 #this is the column for the value of interest for CO2
 
 #vds refers to the time sequence to run the vds
 
-vds.num.columns.keep = 17 #this is the number of columns to keep for the VDS
-vds.rh = 14 #RH column for VDS column
-vds.temperature = 16 #Temp column for VDS column
-vds.cCO2 = 12 #CO2 concentration column for VDS
-vds.cO2 = 17 #O2 concentration column for VDS
-vds.time = 1 #this is the first column for the TimeSequence VDS
+num_columns_keep_vds = 17 #this is the number of columns to keep for the VDS
+rh_vds = 14 #RH column for VDS column
+temp_vds = 16 #Temp column for VDS column
+cCO2_vds = 12 #CO2 concentration column for VDS
+cO2_vds = 17 #O2 concentration column for VDS
+time_vds = 1 #this is the first column for the TimeSequence VDS
 
-vds.include = 15 #column to choose what goes into the cycle
+include_vds = 15 #column to choose what goes into the cycle
 #tells the software where the "include" column is in your VDS spreadsheet
 
-interest.variable = 'co2.concentration'
+interest_variable = 'co2.concentration'
 #the above variable indicates the name of the analyte
 
-include.check = 0
+include_check = 0
 #use 0 for all include above 1
 #use n to filter out rows with n assigned to include
 
-process_type = '2'
+process_type = '1'
 
 #use 1 for CO2 process
 #use 2 for RH, O2 process
