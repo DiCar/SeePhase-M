@@ -1,12 +1,19 @@
-#main file
+# main file
 
-#import required packages (PMD)
+# Styling notes:
+# Any programming notes that are to be deleted once some function/feature is implemented
+# are preceeded by three hash marks, eg. '### Find a way to combine RH probe data with seePhase data.'
+# Code that is commented out because it is not currently working or needed is preceeded with a #and no space
+# Permanent comments begin with a # and a space.
+# Other styling choices are defined in Google's R Style Guide, https://google.github.io/styleguide/Rguide.xml
+
+# Import required packages (PMD)
 source('helperFunctions.R')
 require(reshape2)
 require(ggplot2)
 require(manipulate) #allows the creation of an interactive plot
 
-#Define global variables (PMD)
+# Define global variables (PMD)
 t <- Sys.time()
 timeStamp <-  strftime(t,"%Y-%m-%d_%H-%M-%S")
 
@@ -18,7 +25,7 @@ for (i in 1:length(settings.lines)){
   eval(parse(text=temp))
 }
 
-#load VDS file into a list, vds
+# Load VDS file into a list, vds
 vds <- read.delim(vdsFilePath)
 
 #set number of columns to save from VDS file
@@ -47,6 +54,8 @@ elapsedTimeHour <- elapsedTimeSec / 3600
 #seePhase2 <- cbind(data1,elapsedTimeSec,elapsedTimeHour, data13)
 seePhase2 <- cbind(seePhase, elapsedTimeSec, elapsedTimeHour) #adds elapsedTimeSec and elapsedTimeHour columns to SeePhase data (PMD)
 
+#If we add the vds data to the seePhase data here we can plot a Phase vs Time graph with Temperature series
+#As it stands, the Phase information is removed before the Temperature series is glued in from the VDS file
 #create names for slicing later
 name.seePhase.time = colnames(seePhase2)[seePhase.time] #assigns name from time column to variable; column is assigned by seePhase.time variable in settings file (PMD)
 name.seePhase.temperature = colnames(seePhase2)[seePhase.temperature] #assigns name from temperature column to variable; column is assigned by seePhase.temperature variable in settings file (PMD)
@@ -88,7 +97,7 @@ line <- readline()
 if (line == '1'){stop("user stopped script")}
 
 print(offset_value_main)
-data35 <- extracting_points_offset(seePhase2, elapsed.time, offset_value_main)
+data35 <- extracting_points_offset(seePhase2, elapsed.time, offset_value_main) #grabs only the values at the offset points on the graph, cuts out much of the data rows
 data36 <- cbind(data35,vds2) #combines SeePhase and VDS data into one list (PMD)
 
 
@@ -102,6 +111,7 @@ data36 <- cbind(data35,vds2) #combines SeePhase and VDS data into one list (PMD)
 
 
 #tf2 <- data36[c("Ph4","AnalogB","include","temp","rh", "Concentration.of.Gas....")]
+#Removes many of the columns from data36
 tf2 <- data36[c(name.seePhase.phase,name.seePhase.temperature,name.vds.include,name.vds.temperature,name.vds.rh,name.vds.cCO2)]
 
 #Assign the column number of name.vds.include to a variable
@@ -228,16 +238,23 @@ if (process_type == '2'){
   
   t_plot <- melt(table_averaged, id.vars = name.vds.rh, variable.name = 'series')
   #number <- names(e1)[i]
-  plotId <- paste(name.seePhase.phase, "RH vs Temperature Plot")
+  plotId <- paste(name.seePhase.phase, "vs RH with Temperature Series")
   g <- ggplot(t_plot, aes_string(name.vds.rh,"value")) + 
     geom_point(aes(colour = series)) + 
     ggtitle(plotId) + xlab('RH%') + ylab(name.seePhase.phase)
   print(g)
   ggplotname <- paste0(tPath,"plot_RHvsT.png")
   ggsave(file=ggplotname)
-  
 
-  
+# Plot the data as a function of time
+  ### Still need to add temperature series to the time.series
+  ### Should be able to do this with aggregate(), but need seePhase and VDS data in one df
+  time.series <- aggregate(Ph4 ~ elapsedTimeSec, data = seePhase2, sum)
+  plotId <- paste(name.seePhase.phase, "vs Time with Temperature Series")
+  #plot(time.series, type = 'l')
+  ggplot(time.series, aes(elapsedTimeSec, Ph4)) +
+    geom_line() + 
+    ggtitle(plotId) + xlab('Time') + ylab(name.seePhase.phase)
   ggplotname <- paste0(tPath,"plot_DataVsTime.png")
   ggsave(file=ggplotname)
 
@@ -253,6 +270,3 @@ if (process_type == '2'){
   
   
 }
-
-#ggplot(seePhase2, aes(elapsedTimeSec, Ph4)) +
-#  geom_line()
