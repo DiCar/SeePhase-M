@@ -22,7 +22,7 @@ for (i in 1:length(settings.lines)){
 vds <- read.delim(vdsFilePath)
 
 #set number of columns to save from VDS file
-vds <- vds[1:num_columns_keep_vds] #removes columns beyond vds.num.columns.keep, see settings file (PMD)
+vds <- vds[1:vds.num.columns.keep] #removes columns beyond vds.num.columns.keep, see settings file (PMD)
 vds <- vds[!is.na(vds[1]),] #removes empty cells, which are imported as NA (PMD)
 
 elapsed.time <- genElapsedTime(vdsFilePath) #stores elapsed time of VDS method as a double, using helper function genElapsedTime (PMD)
@@ -31,7 +31,7 @@ elapsed.time <- elapsed.time[!is.na(elapsed.time)] #removes blank cells from ela
 
 vds2 <- cbind(vds, elapsed.time) #creates a new list, vds2, with elapsed time as a column (PMD)
 
-colnames(vds2)[rh_vds] = "rh" #changes RH column name from 'RH....' to 'rh' in vds2 (PMD)
+colnames(vds2)[vds.rh] = "rh" #changes RH column name from 'RH....' to 'rh' in vds2 (PMD)
 
 #read in the SeePhase data (as a list) (PMD)
 seePhase <- read.csv(dataFilePath)
@@ -59,12 +59,12 @@ name.vds.time = colnames(vds2)[vds.time] #returns 'time.s.' (PMD)
 name.vds.include = colnames(vds2)[vds.include] #returns 'Include' (PMD)
 
 #Generate a plot from the raw SeePhase data
-createPlot <- function(x,y,xmin,xmax,ymin,ymax,offset_value,phase_data,include_column){
+createPlot <- function(x,y,xmin,xmax,ymin,ymax,offset_value,phase_data,vds.include){
   data35 <- extracting_points_offset(seePhase2, elapsed.time, offset_value)
   
   plot(x,y,type='l',xlim=c(xmin,xmax),ylim=c(ymin,ymax))
   points(data35$elapsedTimeHour,data35[,seePhase.phase],col="red")
-  data37 <- data35[vds2[,include_column] == 0,]
+  data37 <- data35[vds2[,vds.include] == 0,]
   points(data37$elapsedTimeHour,data37[,seePhase.phase],col="green")
 }
 
@@ -72,7 +72,7 @@ offset_value_main = 0
 
 #Generate the interactive plot for finding an acceptable offset value
 manipulate(
-  {createPlot(seePhase2$elapsedTimeHour,seePhase2[,seePhase.phase],x.min,x.max,y.min,y.max,offset_value,seePhase.phase,include_vds)
+  {createPlot(seePhase2$elapsedTimeHour,seePhase2[,seePhase.phase],x.min,x.max,y.min,y.max,offset_value,seePhase.phase,vds.include)
     offset_value_main <<- offset_value},
   x.min = slider(0,as.integer(seePhase2$elapsedTimeHour[length(seePhase2$elapsedTimeHour)]),initial=0),
   x.max = slider(0,as.integer(seePhase2$elapsedTimeHour[length(seePhase2$elapsedTimeHour)]),initial=as.integer(seePhase2$elapsedTimeHour[length(seePhase2$elapsedTimeHour)])),
@@ -229,15 +229,22 @@ if (process_type == '2'){
   t_plot <- melt(table_averaged, id.vars = name.vds.rh, variable.name = 'series')
   #number <- names(e1)[i]
   plotId <- paste(name.seePhase.phase, "RH vs Temperature Plot")
-  g <- ggplot(t_plot, aes_string(name.vds.rh,"value")) + geom_point(aes(colour = series)) + ggtitle(plotId)+xlab('RH%')+ylab(name.seePhase.phase)
+  g <- ggplot(t_plot, aes_string(name.vds.rh,"value")) + 
+    geom_point(aes(colour = series)) + 
+    ggtitle(plotId) + xlab('RH%') + ylab(name.seePhase.phase)
   print(g)
-  ggplotname <- paste0(tPath,"plot_forRHvsT.png")
+  ggplotname <- paste0(tPath,"plot_RHvsT.png")
   ggsave(file=ggplotname)
+  
 
   
-  
+  ggplotname <- paste0(tPath,"plot_DataVsTime.png")
+  ggsave(file=ggplotname)
+
+  #Make a copy of the settings file and place in processed data directory
   file.copy('settings.txt',tPath)
   
+  #add the offset value and process type used to the new settings file
   write(paste0("offset_value_main = ",offset_value_main," #used for this set of run"),file=paste0(tPath,"settings.txt"),append=TRUE)
   write(paste0("process_type = ",process_type," #used for this set of run"),file=paste0(tPath,"settings.txt"),append=TRUE)
   write.csv(tf4,paste0(tPath,"selectedpoints.csv"),col.names=FALSE)
@@ -247,5 +254,5 @@ if (process_type == '2'){
   
 }
 
-
-
+#ggplot(seePhase2, aes(elapsedTimeSec, Ph4)) +
+#  geom_line()
