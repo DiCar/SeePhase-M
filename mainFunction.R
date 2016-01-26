@@ -112,7 +112,7 @@ data36 <- cbind(data35,vds2) #combines SeePhase and VDS data into one list (PMD)
 
 #tf2 <- data36[c("Ph4","AnalogB","include","temp","rh", "Concentration.of.Gas....")]
 #Removes many of the columns from data36
-tf2 <- data36[c(name.seePhase.phase,name.seePhase.temperature,name.vds.include,name.vds.temperature,name.vds.rh,name.vds.cCO2)]
+tf2 <- data36[c(name.seePhase.phase,name.seePhase.temperature,name.vds.include,name.vds.temperature,name.vds.rh,name.vds.cO2)]
 
 #Assign the column number of name.vds.include to a variable
 include.index <- grep(name.vds.include,colnames(tf2))
@@ -211,7 +211,7 @@ if (process_type == '2'){
   
   
   x_text = "table_check <- dcast(tf4, AAAA1111 ~ BBBB2222, length, value.var='CCCC3333')"
-  x_text = sub("AAAA1111",name.vds.rh,x_text)
+  x_text = sub("AAAA1111",name.vds.cO2,x_text) #CHANGED NAME.VDS.RH TO O2 HERE
   x_text = sub("BBBB2222",name.vds.temperature,x_text)
   x_text = sub("CCCC3333",name.seePhase.phase,x_text)
   #table_check <- dcast(e1[[i]], concentration.co2 ~ rh, length, value.var="Ph4")
@@ -222,7 +222,7 @@ if (process_type == '2'){
   write.csv(table_check,paste0(tPath,"check_table_RH.csv"),row.names=FALSE)
   
   x_text2 = "table_averaged <- dcast(tf4, AAAA1111 ~ BBBB2222, mean, value.var='CCCC3333')"
-  x_text2 = sub("AAAA1111",name.vds.rh,x_text2)
+  x_text2 = sub("AAAA1111",name.vds.cO2,x_text2) #CHANGED FROM RH FOR MY O2 FULL CALIBRATION
   x_text2 = sub("BBBB2222",name.vds.temperature,x_text2)
   x_text2 = sub("CCCC3333",name.seePhase.phase,x_text2)
   #table_averaged <- dcast(e1[[i]], concentration.co2 ~ rh, mean, value.var="Ph4")
@@ -236,25 +236,26 @@ if (process_type == '2'){
 #   write("---------",file=paste0(tPath,"table_averaged.csv"),append=TRUE)
 #   write.table(table_averaged,paste0(tPath,"table_averaged.csv"),sep=",",append=TRUE,row.names=FALSE)
   
-  t_plot <- melt(table_averaged, id.vars = name.vds.rh, variable.name = 'series')
+  t_plot <- melt(table_averaged, id.vars = name.vds.cO2, variable.name = 'series') #CHANGED ID.VARS HERE FOR O2 FULL CALIBRATION
   #number <- names(e1)[i]
   plotId <- paste(name.seePhase.phase, "vs RH with Temperature Series")
-  g <- ggplot(t_plot, aes_string(name.vds.rh,"value")) + 
+  variable.series.plot <- ggplot(t_plot, aes_string(name.vds.cO2,"value")) + #CHANGED RH TO O2 HERE
     geom_point(aes(colour = series)) + 
     ggtitle(plotId) + xlab('RH%') + ylab(name.seePhase.phase)
-  print(g)
+  print(variable.series.plot)
   ggplotname <- paste0(tPath,"plot_RHvsT.png")
   ggsave(file=ggplotname)
 
 # Plot the data as a function of time
   ### Still need to add temperature series to the time.series
   ### Should be able to do this with aggregate(), but need seePhase and VDS data in one df
-  time.series <- aggregate(Ph4 ~ elapsedTimeSec, data = seePhase2, sum)
+  time.series <- aggregate(Ph1 ~ elapsedTimeSec, data = seePhase2, sum)
   plotId <- paste(name.seePhase.phase, "vs Time with Temperature Series")
   #plot(time.series, type = 'l')
-  ggplot(time.series, aes(elapsedTimeSec, Ph4)) +
+  time.series.plot <- ggplot(time.series, aes(elapsedTimeSec, Ph1)) +
     geom_line() + 
     ggtitle(plotId) + xlab('Time') + ylab(name.seePhase.phase)
+  print(time.series.plot)
   ggplotname <- paste0(tPath,"plot_DataVsTime.png")
   ggsave(file=ggplotname)
 
