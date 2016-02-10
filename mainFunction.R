@@ -28,7 +28,7 @@ for (i in 1:length(settings.lines)){
 # Load VDS file into a list, vds
 vds <- read.delim(vdsFilePath)
 
-#set number of columns to save from VDS file
+# set number of columns to save from VDS file
 vds <- vds[1:vds.num.columns.keep] #removes columns beyond vds.num.columns.keep, see settings file (PMD)
 vds <- vds[!is.na(vds[1]),] #removes empty cells, which are imported as NA (PMD)
 
@@ -40,10 +40,12 @@ vds2 <- cbind(vds, elapsed.time) #creates a new list, vds2, with elapsed time as
 
 colnames(vds2)[vds.rh] = "rh" #changes RH column name from 'RH....' to 'rh' in vds2 (PMD)
 
-#read in the SeePhase data (as a list) (PMD)
+# read in the SeePhase data (as a list) (PMD)
 seePhase <- read.csv(dataFilePath)
 
-##humidity when working
+# Read in Vaisala data
+vaisala.data <- read.csv(vaisala.file.path)
+vaisala.data <- vaisala.data[complete.cases(vaisala.data),]
 #data12 <- read.delim("Part 1 humidity.txt", stringsAsFactors = FALSE)
 #colnames(data12) = c("probeTime","probe.rh","probe.temp")
 #data13 <- fix_length(data12, nrow(data1))
@@ -56,7 +58,8 @@ seePhase2 <- cbind(seePhase, elapsedTimeSec, elapsedTimeHour) #adds elapsedTimeS
 
 #If we add the vds data to the seePhase data here we can plot a Phase vs Time graph with Temperature series
 #As it stands, the Phase information is removed before the Temperature series is glued in from the VDS file
-#create names for slicing later
+
+#Assign column names from data files to variables (for slicing later)
 name.seePhase.time = colnames(seePhase2)[seePhase.time] #assigns name from time column to variable; column is assigned by seePhase.time variable in settings file (PMD)
 name.seePhase.temperature = colnames(seePhase2)[seePhase.temperature] #assigns name from temperature column to variable; column is assigned by seePhase.temperature variable in settings file (PMD)
 name.seePhase.phase = colnames(seePhase2)[seePhase.phase] #assigns name from phase column to variable; column is assigned by seePhase.phase variable in settings file (PMD)
@@ -71,9 +74,10 @@ name.vds.include = colnames(vds2)[vds.include] #returns 'Include' (PMD)
 createPlot <- function(x,y,xmin,xmax,ymin,ymax,offset_value,phase_data,vds.include){
   data35 <- extracting_points_offset(seePhase2, elapsed.time, offset_value)
   
+  #This plots seePhase data as a line plot, and then overlays a point plot with just the extracted points plotted  
   plot(x,y,type='l',xlim=c(xmin,xmax),ylim=c(ymin,ymax))
-  points(data35$elapsedTimeHour,data35[,seePhase.phase],col="red")
-  data37 <- data35[vds2[,vds.include] == 0,]
+  points(data35$elapsedTimeHour,data35[,seePhase.phase],col="red") # this puts a red dot at every elapsed time point, offset value initially set a zero
+  data37 <- data35[vds2[,vds.include] == 0,] # this just turns the vds.include 0 dots green
   points(data37$elapsedTimeHour,data37[,seePhase.phase],col="green")
 }
 
@@ -100,6 +104,49 @@ print(offset_value_main)
 data35 <- extracting_points_offset(seePhase2, elapsed.time, offset_value_main) #grabs only the values at the offset points on the graph, cuts out much of the data rows
 data36 <- cbind(data35,vds2) #combines SeePhase and VDS data into one list (PMD)
 
+###################TEST INTERACTIVE PLOT FOR VAISALA DATA###########################
+# #need to generate a data frame where the time variable is changed by the offset value
+# linegraph_offset2 <- function(variableRH, time, offset){
+#   for (i in time){
+#     time[i] <- time[i] + offset
+#   }
+# }
+# 
+# 
+# #Define CreatePlot function
+# createPlot <- function(x,y,xmin,xmax,ymin,ymax,offset_value,phase_data){
+#   temp.plot <- linegraph_offset2(vaisala.data$RH..., vaisala.data$VaisalaTimeHours, offset_value)
+#   
+#   plot(x,y,type='l',xlim=c(xmin,xmax),ylim=c(ymin,ymax))
+#   lines(vaisala.data$VaisalaTimeHours,vaisala.data[,2],col="red")
+#   points(temp.plot[,1],temp.plot[,2],col="red")
+# }
+# 
+# offset_value_main = 0
+# 
+# #Generate the interactive plot for finding an acceptable offset value
+# #manipulate loops everytime a slider is changes, thus runs create plot each time
+# manipulate(
+#   {createPlot(seePhase2$elapsedTimeHour,seePhase2[,seePhase.phase],x.min,x.max,y.min,y.max,offset_value,2)
+#     offset_value_main <- offset_value},
+#   x.min = slider(0,as.integer(vaisala.data$VaisalaTimeHours[length(vaisala.data$VaisalaTimeHours)]),initial=0),
+#   x.max = slider(0,as.integer(vaisala.data$VaisalaTimeHours[length(vaisala.data$VaisalaTimeHours)]),initial=as.integer(vaisala.data$VaisalaTimeHours[length(vaisala.data$VaisalaTimeHours)])),
+#   y.min = slider(0,as.integer(max(vaisala.data[,2]))+10,initial=0),
+#   y.max = slider(0,as.integer(max(vaisala.data[,2]))+10,initial=as.integer(max(vaisala.data[,2]))+10),
+#   offset_value = slider(-3600,3600,initial=0)
+#   
+# )
+# 
+# #Opportunity to stop the script if an acceptable offset value cannot be found
+# cat ("Press [enter] to continue, 1 = stop")
+# line <- readline()
+# if (line == '1'){stop("user stopped script")}
+# 
+# print(offset_value_main)
+# data35 <- extracting_points_offset(seePhase2, elapsed.time, offset_value_main) #grabs only the values at the offset points on the graph, cuts out much of the data rows
+# data36 <- cbind(data35,vds2) #combines SeePhase and VDS data into one list (PMD)
+
+#####################################################################################
 
 #comparing the results to those from sigmaplot
 #data4 <- read.csv("diff.csv")
@@ -211,7 +258,7 @@ if (process_type == '2'){
   
   
   x_text = "table_check <- dcast(tf4, AAAA1111 ~ BBBB2222, length, value.var='CCCC3333')"
-  x_text = sub("AAAA1111",name.vds.cO2,x_text) #CHANGED NAME.VDS.RH TO O2 HERE
+  x_text = sub("AAAA1111",name.vds.rh,x_text) #CHANGED NAME.VDS.RH TO O2 HERE ###NEED TO SOFT CODE THIS
   x_text = sub("BBBB2222",name.vds.temperature,x_text)
   x_text = sub("CCCC3333",name.seePhase.phase,x_text)
   #table_check <- dcast(e1[[i]], concentration.co2 ~ rh, length, value.var="Ph4")
@@ -222,7 +269,7 @@ if (process_type == '2'){
   write.csv(table_check,paste0(tPath,"check_table_RH.csv"),row.names=FALSE)
   
   x_text2 = "table_averaged <- dcast(tf4, AAAA1111 ~ BBBB2222, mean, value.var='CCCC3333')"
-  x_text2 = sub("AAAA1111",name.vds.cO2,x_text2) #CHANGED FROM RH FOR MY O2 FULL CALIBRATION
+  x_text2 = sub("AAAA1111",name.vds.rh,x_text2) #CHANGED FROM RH FOR MY O2 FULL CALIBRATION ###NEED TO SOFT CODE THIS
   x_text2 = sub("BBBB2222",name.vds.temperature,x_text2)
   x_text2 = sub("CCCC3333",name.seePhase.phase,x_text2)
   #table_averaged <- dcast(e1[[i]], concentration.co2 ~ rh, mean, value.var="Ph4")
@@ -236,14 +283,14 @@ if (process_type == '2'){
 #   write("---------",file=paste0(tPath,"table_averaged.csv"),append=TRUE)
 #   write.table(table_averaged,paste0(tPath,"table_averaged.csv"),sep=",",append=TRUE,row.names=FALSE)
   
-  t_plot <- melt(table_averaged, id.vars = name.vds.cO2, variable.name = 'series') #CHANGED ID.VARS HERE FOR O2 FULL CALIBRATION
+  t_plot <- melt(table_averaged, id.vars = name.vds.rh, variable.name = 'series') #CHANGED ID.VARS HERE FOR O2 FULL CALIBRATION ###NEED TO SOFT CODE THIS
   #number <- names(e1)[i]
-  plotId <- paste(name.seePhase.phase, "vs RH with Temperature Series")
-  variable.series.plot <- ggplot(t_plot, aes_string(name.vds.cO2,"value")) + #CHANGED RH TO O2 HERE
+  plotId <- paste(name.seePhase.phase, "vs O2% with Temperature Series")
+  variable.series.plot <- ggplot(t_plot, aes_string(name.vds.rh,"value")) + #CHANGED RH TO O2 HERE ###NEED TO SOFT CODE THIS
     geom_point(aes(colour = series)) + 
-    ggtitle(plotId) + xlab('RH%') + ylab(name.seePhase.phase)
+    ggtitle(plotId) + xlab('O2 (%)') + ylab(name.seePhase.phase)
   print(variable.series.plot)
-  ggplotname <- paste0(tPath,"plot_RHvsT.png")
+  ggplotname <- paste0(tPath,"plot_O2vsT.png")
   ggsave(file=ggplotname)
 
 # Plot the data as a function of time
