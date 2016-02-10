@@ -1,6 +1,6 @@
-dataFilePath = "S:\R&D Docs\R&D Shared\3250 NASA NIOGS II\Data\PATCHCAL_RH\PATCHCAL_RH_160205T01\prc02_05_2016___07_24_47PM.csv"
-vdsFilePath = "S:\R&D Docs\R&D Shared\3250 NASA NIOGS II\Data\PATCHCAL_RH\PATCHCAL_RH_160205T01\RH Full Calibration with Temp Quick 32max - PD.txt" #let it be in the Tab Delimited format, must have two extra columns (include and Temp in columns O and P, respectively)
-vaisala.file.path = "S:\R&D Docs\R&D Shared\3250 NASA NIOGS II\Data\PATCHCAL_RH\PATCHCAL_RH_160205T01\Vaisala_160205T01.csv"
+dataFilePath = "/Users/DiCar/Documents/Programming/GitHub/SeePhase-M/PATCHCAL_RH_160205T01/prc02_05_2016___07_24_47PM.csv"
+vdsFilePath = "/Users/DiCar/Documents/Programming/GitHub/SeePhase-M/PATCHCAL_RH_160205T01/RH Full Calibration with Temp Quick 32max - PD.txt" #let it be in the Tab Delimited format, must have two extra columns (include and Temp in columns O and P, respectively)
+vaisala.file.path = "/Users/DiCar/Documents/Programming/GitHub/SeePhase-M/PATCHCAL_RH_160205T01/Vaisala_160205T01.csv"
 
 #data refers to the raw file from seephase
 
@@ -19,6 +19,10 @@ vds.time = 1 #this is the first column for the TimeSequence VDS
 
 vds.include = 16 #column to choose what goes into the cycle
 #tells the software where the "include" column is in your VDS spreadsheet
+
+vaisala.RH = 3
+vaisala.temperature = 4
+vaisala.pwater = 5
 
 interest.variable = 'O2 Concentration'
 #the above variable indicates the name of the analyte

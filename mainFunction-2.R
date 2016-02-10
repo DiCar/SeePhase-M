@@ -44,8 +44,8 @@ colnames(vds2)[vds.rh] = "rh" #changes RH column name from 'RH....' to 'rh' in v
 seePhase <- read.csv(dataFilePath)
 
 # Read in Vaisala data
-vaisala.data <- read.csv(vaisala.file.path, header = TRUE)
-vaisala.data <- vaisala.data[complete.cases(vaisala.data),]
+vaisala <- read.csv(vaisala.file.path, header = TRUE)
+vaisala <- vaisala[complete.cases(vaisala),]
 #data12 <- read.delim("Part 1 humidity.txt", stringsAsFactors = FALSE)
 #colnames(data12) = c("probeTime","probe.rh","probe.temp")
 #data13 <- fix_length(data12, nrow(data1))
@@ -69,6 +69,10 @@ name.vds.cCO2 = colnames(vds2)[vds.cCO2] #returns 'Concentration.of.Gas...'(PMD)
 name.vds.cO2 = colnames(vds2)[vds.cO2] #returns 'elapsed.time'...should return O2 concentration (PMD)
 name.vds.time = colnames(vds2)[vds.time] #returns 'time.s.' (PMD)
 name.vds.include = colnames(vds2)[vds.include] #returns 'Include' (PMD)
+name.vaisala.RH = colnames(vaisala)[vaisala.RH]
+name.vaisala.temperature = colnames(vaisala)[vaisala.temperature]
+name.vaisala.pwater = colnames(vaisala)[vaisala.pwater]
+
 
 #Generate a plot from the raw SeePhase data
 createPlot <- function(x,y,xmin,xmax,ymin,ymax,offset_value,phase_data,vds.include){
@@ -102,8 +106,9 @@ if (line == '1'){stop("user stopped script")}
 
 print(offset_value_main)
 data35 <- extracting_points_offset(seePhase2, elapsed.time, offset_value_main) #grabs only the values at the offset points on the graph, cuts out much of the data rows
+data355 <- extracting_points_offset(vaisala, elapsed.time, offset_value_main)
 data36 <- cbind(data35,vds2) #combines SeePhase and VDS data into one list (PMD)
-
+data365 <- cbind(data35,vds2, data355)
 ###################TEST INTERACTIVE PLOT FOR VAISALA DATA###########################
 # #need to generate a data frame where the time variable is changed by the offset value
 # linegraph_offset2 <- function(variableRH, time, offset){
@@ -115,10 +120,10 @@ data36 <- cbind(data35,vds2) #combines SeePhase and VDS data into one list (PMD)
 # 
 # #Define CreatePlot function
 # createPlot <- function(x,y,xmin,xmax,ymin,ymax,offset_value,phase_data){
-#   temp.plot <- linegraph_offset2(vaisala.data$RH..., vaisala.data$VaisalaTimeHours, offset_value)
+#   temp.plot <- linegraph_offset2(vaisala$RH..., vaisala$VaisalaTimeHours, offset_value)
 #   
 #   plot(x,y,type='l',xlim=c(xmin,xmax),ylim=c(ymin,ymax))
-#   lines(vaisala.data$VaisalaTimeHours,vaisala.data[,2],col="red")
+#   lines(vaisala$VaisalaTimeHours,vaisala[,2],col="red")
 #   points(temp.plot[,1],temp.plot[,2],col="red")
 # }
 # 
@@ -129,10 +134,10 @@ data36 <- cbind(data35,vds2) #combines SeePhase and VDS data into one list (PMD)
 # manipulate(
 #   {createPlot(seePhase2$elapsedTimeHour,seePhase2[,seePhase.phase],x.min,x.max,y.min,y.max,offset_value,2)
 #     offset_value_main <- offset_value},
-#   x.min = slider(0,as.integer(vaisala.data$VaisalaTimeHours[length(vaisala.data$VaisalaTimeHours)]),initial=0),
-#   x.max = slider(0,as.integer(vaisala.data$VaisalaTimeHours[length(vaisala.data$VaisalaTimeHours)]),initial=as.integer(vaisala.data$VaisalaTimeHours[length(vaisala.data$VaisalaTimeHours)])),
-#   y.min = slider(0,as.integer(max(vaisala.data[,2]))+10,initial=0),
-#   y.max = slider(0,as.integer(max(vaisala.data[,2]))+10,initial=as.integer(max(vaisala.data[,2]))+10),
+#   x.min = slider(0,as.integer(vaisala$VaisalaTimeHours[length(vaisala$VaisalaTimeHours)]),initial=0),
+#   x.max = slider(0,as.integer(vaisala$VaisalaTimeHours[length(vaisala$VaisalaTimeHours)]),initial=as.integer(vaisala$VaisalaTimeHours[length(vaisala$VaisalaTimeHours)])),
+#   y.min = slider(0,as.integer(max(vaisala[,2]))+10,initial=0),
+#   y.max = slider(0,as.integer(max(vaisala[,2]))+10,initial=as.integer(max(vaisala[,2]))+10),
 #   offset_value = slider(-3600,3600,initial=0)
 #   
 # )
@@ -160,6 +165,7 @@ data36 <- cbind(data35,vds2) #combines SeePhase and VDS data into one list (PMD)
 #tf2 <- data36[c("Ph4","AnalogB","include","temp","rh", "Concentration.of.Gas....")]
 #Removes many of the columns from data36
 tf2 <- data36[c(name.seePhase.phase,name.seePhase.temperature,name.vds.include,name.vds.temperature,name.vds.rh,name.vds.cO2)]
+tf3 <- data365[c(name.seePhase.phase,name.seePhase.temperature,name.vds.include,name.vds.temperature,name.vds.rh,name.vds.cO2, name.vaisala.RH, name.vaisala.temperature, name.vaisala.pwater)]
 
 #Assign the column number of name.vds.include to a variable
 include.index <- grep(name.vds.include,colnames(tf2))
