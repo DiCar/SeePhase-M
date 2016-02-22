@@ -162,10 +162,9 @@ data365 <- cbind(data35,vds2, data355)
 #garbage data, since I don't have the timestamps to line everything up
 
 
-#tf2 <- data36[c("Ph4","AnalogB","include","temp","rh", "Concentration.of.Gas....")]
 #Removes many of the columns from data36
-tf2 <- data36[c(name.seePhase.phase,name.seePhase.temperature,name.vds.include,name.vds.temperature,name.vds.rh,name.vds.cO2)]
-tf3 <- data365[c(name.seePhase.phase,name.seePhase.temperature,name.vds.include,name.vds.temperature,name.vds.rh,name.vds.cO2, name.vaisala.RH, name.vaisala.temperature, name.vaisala.pwater)]
+#tf2 <- data36[c(name.seePhase.phase,name.seePhase.temperature,name.vds.include,name.vds.temperature,name.vds.rh,name.vds.cO2)]
+tf2 <- data365[c(name.seePhase.phase,name.seePhase.temperature,name.vds.include,name.vds.temperature,name.vds.rh,name.vds.cO2, name.vaisala.RH, name.vaisala.temperature, name.vaisala.pwater)]
 
 #Assign the column number of name.vds.include to a variable
 include.index <- grep(name.vds.include,colnames(tf2))
@@ -189,7 +188,8 @@ if (include.check > 1){
 }
 
 #Assign the column number of name.vds.temperature to a variable
-temp.index <- grep(name.vds.temperature,colnames(tf2))
+nominal.temperature.index <- grep(name.vds.temperature,colnames(tf2))
+real.temperature.index<- grep(name.vaisala.temperature,colnames(tf2))
 
 #create directory to store output files, and define the path to that directory
 dir.name <- paste(timeStamp, name.seePhase.phase)
@@ -254,18 +254,43 @@ if (process_type == '1'){
 
 if (process_type == '2'){
 
-  #e1<- split(tf4, tf4[,temp_index])
-  
-  #write("TablePlot",file=paste0(tPath,"table_averaged.csv"))
-  #write("---------",file=paste0(tPath,"table_averaged.csv"),append=TRUE)
-  
-  #ttPath <- paste0(tPath,"pieces/")
-  #dir.create(ttPath)
-  
+# original script, uses nominal RH and temp from vds file
+#   x_text = "table_check <- dcast(tf4, AAAA1111 ~ BBBB2222, length, value.var='CCCC3333')"
+#   x_text = sub("AAAA1111",name.vds.rh,x_text) #CHANGED NAME.VDS.RH TO O2 HERE ###NEED TO SOFT CODE THIS
+#   x_text = sub("BBBB2222",name.vds.temperature,x_text)
+#   x_text = sub("CCCC3333",name.seePhase.phase,x_text)
+#   #table_check <- dcast(e1[[i]], concentration.co2 ~ rh, length, value.var="Ph4")
+#   #table_check <- dcast(tf4, rh ~ temp, length, value.var="Ph4")
+#   eval(parse(text=x_text))
+#   
+#   print(table_check) #allows user to verify that the correct data is being used
+#   write.csv(table_check,paste0(tPath,"check_table_RH.csv"),row.names=FALSE)
+#   
+#   x_text2 = "table_averaged <- dcast(tf4, AAAA1111 ~ BBBB2222, mean, value.var='CCCC3333')"
+#   x_text2 = sub("AAAA1111",name.vds.rh,x_text2) #CHANGED FROM RH FOR MY O2 FULL CALIBRATION ###NEED TO SOFT CODE THIS
+#   x_text2 = sub("BBBB2222",name.vds.temperature,x_text2)
+#   x_text2 = sub("CCCC3333",name.seePhase.phase,x_text2)
+#   #table_averaged <- dcast(e1[[i]], concentration.co2 ~ rh, mean, value.var="Ph4")
+#   #table_averaged <- dcast(tf4, rh ~ temp, mean, value.var="Ph4")
+#   eval(parse(text=x_text2))
+#   
+#   print(table_averaged)
+#   write.csv(table_averaged,paste0(tPath,"averaged_table_RH.csv"),row.names=FALSE)
+#   
+# 
+#   t_plot <- melt(table_averaged, id.vars = name.vds.rh, variable.name = 'series') #CHANGED ID.VARS HERE FOR O2 FULL CALIBRATION ###NEED TO SOFT CODE THIS
+#   #number <- names(e1)[i]
+#   plotId <- paste(name.seePhase.phase, "vs O2% with Temperature Series")
+#   variable.series.plot <- ggplot(t_plot, aes_string(name.vds.rh,"value")) + #CHANGED RH TO O2 HERE ###NEED TO SOFT CODE THIS
+#     geom_point(aes(colour = series)) + 
+#     ggtitle(plotId) + xlab('O2 (%)') + ylab(name.seePhase.phase)
+#   print(variable.series.plot)
+#   ggplotname <- paste0(tPath,"plot_O2vsT.png")
+#   ggsave(file=ggplotname)
   
   x_text = "table_check <- dcast(tf4, AAAA1111 ~ BBBB2222, length, value.var='CCCC3333')"
-  x_text = sub("AAAA1111",name.vds.rh,x_text) #CHANGED NAME.VDS.RH TO O2 HERE ###NEED TO SOFT CODE THIS
-  x_text = sub("BBBB2222",name.vds.temperature,x_text)
+  x_text = sub("AAAA1111",name.vaisala.RH,x_text) #CHANGED NAME.VDS.RH TO O2 HERE ###NEED TO SOFT CODE THIS
+  x_text = sub("BBBB2222",name.vaisala.temperature,x_text)
   x_text = sub("CCCC3333",name.seePhase.phase,x_text)
   #table_check <- dcast(e1[[i]], concentration.co2 ~ rh, length, value.var="Ph4")
   #table_check <- dcast(tf4, rh ~ temp, length, value.var="Ph4")
@@ -285,9 +310,6 @@ if (process_type == '2'){
   print(table_averaged)
   write.csv(table_averaged,paste0(tPath,"averaged_table_RH.csv"),row.names=FALSE)
   
-#   write(paste0("Temperature",names(e1)[i]),file=paste0(tPath,"table_averaged.csv"),append=TRUE)
-#   write("---------",file=paste0(tPath,"table_averaged.csv"),append=TRUE)
-#   write.table(table_averaged,paste0(tPath,"table_averaged.csv"),sep=",",append=TRUE,row.names=FALSE)
   
   t_plot <- melt(table_averaged, id.vars = name.vds.rh, variable.name = 'series') #CHANGED ID.VARS HERE FOR O2 FULL CALIBRATION ###NEED TO SOFT CODE THIS
   #number <- names(e1)[i]
@@ -298,19 +320,19 @@ if (process_type == '2'){
   print(variable.series.plot)
   ggplotname <- paste0(tPath,"plot_O2vsT.png")
   ggsave(file=ggplotname)
-
-# Plot the data as a function of time
-  ### Still need to add temperature series to the time.series
-  ### Should be able to do this with aggregate(), but need seePhase and VDS data in one df
-  time.series <- aggregate(Ph1 ~ elapsedTimeSec, data = seePhase2, sum)
-  plotId <- paste(name.seePhase.phase, "vs Time with Temperature Series")
-  #plot(time.series, type = 'l')
-  time.series.plot <- ggplot(time.series, aes(elapsedTimeSec, Ph1)) +
-    geom_line() + 
-    ggtitle(plotId) + xlab('Time') + ylab(name.seePhase.phase)
-  print(time.series.plot)
-  ggplotname <- paste0(tPath,"plot_DataVsTime.png")
-  ggsave(file=ggplotname)
+   
+# # Plot the data as a function of time
+#   ### Still need to add temperature series to the time.series
+#   ### Should be able to do this with aggregate(), but need seePhase and VDS data in one df
+#   time.series <- aggregate(Ph1 ~ elapsedTimeSec, data = seePhase2, sum)
+#   plotId <- paste(name.seePhase.phase, "vs Time with Temperature Series")
+#   #plot(time.series, type = 'l')
+#   time.series.plot <- ggplot(time.series, aes(elapsedTimeSec, Ph1)) +
+#     geom_line() + 
+#     ggtitle(plotId) + xlab('Time') + ylab(name.seePhase.phase)
+#   print(time.series.plot)
+#   ggplotname <- paste0(tPath,"plot_DataVsTime.png")
+#   ggsave(file=ggplotname)
 
   #Make a copy of the settings file and place in processed data directory
   file.copy('settings.txt',tPath)
