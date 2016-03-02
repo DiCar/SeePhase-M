@@ -1,12 +1,12 @@
-dataFilePath = "S:\R&D Docs\R&D Shared\3250 NASA NIOGS II\Data\PATCHCAL_RH\PATCHCAL_RH_160222T02\prc02_22_2016___07_22_57PM.csv"
-vdsFilePath = "S:\R&D Docs\R&D Shared\3250 NASA NIOGS II\Data\PATCHCAL_RH\PATCHCAL_RH_160222T02\RH Full Calibration with Temp Quick 32max 500ccm - PD.txt" #let it be in the Tab Delimited format, must have two extra columns (include and Temp in columns O and P, respectively)
-vaisala.file.path = "S:\R&D Docs\R&D Shared\3250 NASA NIOGS II\Data\PATCHCAL_RH\PATCHCAL_RH_160222T02\Vaisala_RH_160222T02.txt"
+dataFilePath = "S:\R&D Docs\R&D Shared\3250 NASA NIOGS II\Data\PATCHCAL_RH\PATCHCAL_RH_160226T02\prc02_26_2016___07_10_01PM.csv"
+vdsFilePath = "S:\R&D Docs\R&D Shared\3250 NASA NIOGS II\Data\PATCHCAL_RH\PATCHCAL_RH_160226T02\RH Full Calibration with Temp Quick 32max - PD.txt" #let it be in the Tab Delimited format, must have two extra columns (include and Temp in columns O and P, respectively)
+vaisala.file.path = "S:\R&D Docs\R&D Shared\3250 NASA NIOGS II\Data\PATCHCAL_RH\PATCHCAL_RH_160226T02\Vaisala_RH_160226T02.txt"
 
 #data refers to the raw file from seephase
 
 seePhase.time = 1 #this is the first column for the SeePhase
 seePhase.temperature = 17 #this is the column for the 'AnalogB' column for CO2
-seePhase.phase = 2 #this is the column of the dependant (measured) variable (eg. Ph1, Ph2, Ph3, or Ph4 for the SeePhase)
+seePhase.phase = 8 #this is the column of the dependant (measured) variable (eg. Ph1, Ph2, Ph3, or Ph4 for the SeePhase)
 
 #vds refers to the time sequence to run the vds
 

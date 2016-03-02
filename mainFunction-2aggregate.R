@@ -1,11 +1,14 @@
 # main file
-###Added a change b/c last commit was not synched online github
 # Styling notes:
 # Any programming notes that are to be deleted once some function/feature is implemented
 # are preceeded by three hash marks, eg. '### Find a way to combine RH probe data with seePhase data.'
 # Code that is commented out because it is not currently working or needed is preceeded with a #and no space
 # Permanent comments begin with a # and a space.
 # Other styling choices are defined in Google's R Style Guide, https://google.github.io/styleguide/Rguide.xml
+
+### Improvements to make:
+### Take an average for selected points
+### Plot graphs of each temperature series with Phase and Mag vs time
 
 # Import required packages (PMD)
 source('helperFunctions.R')
