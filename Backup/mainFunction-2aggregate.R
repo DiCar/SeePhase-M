@@ -1,14 +1,11 @@
 # main file
+###Added a change b/c last commit was not synched online github
 # Styling notes:
 # Any programming notes that are to be deleted once some function/feature is implemented
 # are preceeded by three hash marks, eg. '### Find a way to combine RH probe data with seePhase data.'
 # Code that is commented out because it is not currently working or needed is preceeded with a #and no space
 # Permanent comments begin with a # and a space.
 # Other styling choices are defined in Google's R Style Guide, https://google.github.io/styleguide/Rguide.xml
-
-### Improvements to make:
-### Take an average for selected points
-### Plot graphs of each temperature series with Phase and Mag vs time
 
 # Import required packages (PMD)
 source('helperFunctions.R')
@@ -213,67 +210,52 @@ if (process_type == '2'){
   print(table.check.vds) #allows user to verify that the correct data is being used
   write.csv(table.check.vds, paste0(tPath, interest.variable, "_check_table_nominal.csv"),row.names=FALSE)
   
-  x_text2 = "table.selectedpoints.vds <- dcast(tf4, AAAA1111 ~ BBBB2222, mean, value.var='CCCC3333')"
+  x_text2 = "table.averaged.vds <- dcast(tf4, AAAA1111 ~ BBBB2222, mean, value.var='CCCC3333')"
   x_text2 = sub("AAAA1111",name.vds.rh,x_text2) #CHANGED FROM RH FOR MY O2 FULL CALIBRATION ###NEED TO SOFT CODE THIS
   x_text2 = sub("BBBB2222",name.vds.temperature,x_text2)
   x_text2 = sub("CCCC3333",name.seePhase.phase,x_text2)
   eval(parse(text=x_text2))
   
-  print(table.selectedpoints.vds)
-  write.csv(table.selectedpoints.vds,paste0(tPath, interest.variable, "_selectedpoints_table_nominal.csv"),row.names=FALSE)
+  print(table.averaged.vds)
+  write.csv(table.averaged.vds,paste0(tPath, interest.variable, "_averaged_table_nominal.csv"),row.names=FALSE)
   
-  t_plot <- melt(table.selectedpoints.vds, id.vars = name.vds.rh, variable.name = 'series') #CHANGED ID.VARS HERE FOR O2 FULL CALIBRATION ###NEED TO SOFT CODE THIS
-  df <- t_plot
-  x <- name.vds.rh
-  y <- "value"
-  
-  ratio.normalized <- (max(df[x])-min(df[x]))/(max(df[y])-min(df[y]))
-  ratio.plot <- ratio.normalized/ratio.aspect
 
+  t_plot <- melt(table.averaged.vds, id.vars = name.vds.rh, variable.name = 'series') #CHANGED ID.VARS HERE FOR O2 FULL CALIBRATION ###NEED TO SOFT CODE THIS
   plotId <- paste(name.seePhase.phase, "vs", interest.variable, "with Temperature Series\nNominal Variable Values")
   variable.series.plot <- ggplot(t_plot, aes_string(name.vds.rh,"value")) + #CHANGED RH TO O2 HERE ###NEED TO SOFT CODE THIS
     geom_point(aes(colour = series)) + 
-    ggtitle(plotId) + xlab(paste(interest.variable, '(%)')) + ylab(name.seePhase.phase) +
-    coord_fixed(ratio.plot)
+    ggtitle(plotId) + xlab(paste(interest.variable, '(%)')) + ylab(name.seePhase.phase)
   print(variable.series.plot)
   ggplotname <- paste0(tPath,"plot ", interest.variable, "vsT_nominal-", name.seePhase.phase, ".png")
-  ggsave(file=ggplotname, width=width, height=height, units = c("cm"))
+  ggsave(file=ggplotname)
 
-#This is for real temperature (AnalogB) and RH (Vaisala) data  
-  x_text = "table.check.probes <- aggregate(CCCC3333 ~ AAAA1111 + BBBB2222, data = tf4, length)"
+#This is for real vaisala data  
+  x_text = "table.check.vaisala <- aggregate(CCCC3333 ~ AAAA1111 + BBBB2222, data = tf4, length)"
   x_text = sub("AAAA1111",name.vaisala.RH,x_text) #CHANGED NAME.VDS.RH TO O2 HERE ###NEED TO SOFT CODE THIS
-  x_text = sub("BBBB2222",name.seePhase.temperature,x_text)
+  x_text = sub("BBBB2222",name.vaisala.temperature,x_text)
   x_text = sub("CCCC3333",name.seePhase.phase,x_text)
   eval(parse(text=x_text))
   
-  print(table.check.probes) #allows user to verify that the correct data is being used
-  write.csv(table.check.probes, paste0(tPath, interest.variable, "_check_table_probes.csv"),row.names=FALSE)
+  print(table.check.vaisala) #allows user to verify that the correct data is being used
+  write.csv(table.check.vaisala, paste0(tPath, interest.variable, "_check_table_vaisala.csv"),row.names=FALSE)
   
-  x_text2 = "table.selectedpoints.probes <- aggregate(CCCC3333 ~ AAAA1111 + BBBB2222, data = tf4, mean)"
+  x_text2 = "table.averaged.vaisala <- aggregate(CCCC3333 ~ AAAA1111 + BBBB2222, data = tf4, mean)"
   x_text2 = sub("AAAA1111",name.vaisala.RH,x_text2) #CHANGED FROM RH FOR MY O2 FULL CALIBRATION ###NEED TO SOFT CODE THIS
-  x_text2 = sub("BBBB2222",name.seePhase.temperature,x_text2)
+  x_text2 = sub("BBBB2222",name.vaisala.temperature,x_text2)
   x_text2 = sub("CCCC3333",name.seePhase.phase,x_text2)
   eval(parse(text=x_text2))
   
-  print(table.selectedpoints.probes)
-  write.csv(table.selectedpoints.probes, paste0(tPath, interest.variable, "_selectedpoints_table_probes.csv"),row.names=FALSE)
+  print(table.averaged.vaisala)
+  write.csv(table.averaged.vaisala, paste0(tPath, interest.variable, "_averaged_table_vaisala.csv"),row.names=FALSE)
   
-  df <- table.selectedpoints.probes
-  x <- name.vaisala.RH
-  y <- name.seePhase.phase
-  
-  ratio.normalized <- (max(df[x])-min(df[x]))/(max(df[y])-min(df[y]))
-  ratio.plot <- ratio.normalized/ratio.aspect
- 
-  plotId <- paste(name.seePhase.phase, "vs", interest.variable, "with Temperature Series\nProbe Variable Values")
-  variable.series.plot <- ggplot(df, aes_string(name.vaisala.RH, name.seePhase.phase)) + #CHANGED RH TO O2 HERE ###NEED TO SOFT CODE THIS
-    geom_point(aes(colour = AnalogB)) +
-    scale_colour_gradient(limits=c(3, 34), low="blue", high = "red") +
-    ggtitle(plotId) + xlab(paste(interest.variable, '(%)')) + ylab(name.seePhase.phase) +
-    coord_fixed(ratio.plot)
+  plotId <- paste(name.seePhase.phase, "vs", interest.variable, "with Temperature Series\nVaisala Variable Values")
+  variable.series.plot <- ggplot(table.averaged.vaisala, aes_string(name.vaisala.RH, name.seePhase.phase)) + #CHANGED RH TO O2 HERE ###NEED TO SOFT CODE THIS
+    geom_point(aes(colour = vaisalaTemperature)) +
+    scale_colour_gradient(limits=c(3, 33), low="blue", high = "red") +
+    ggtitle(plotId) + xlab(paste(interest.variable, '(%)')) + ylab(name.seePhase.phase)
   print(variable.series.plot)
-  ggplotname <- paste0(tPath,"plot ", interest.variable, "vsT_probes-", name.seePhase.phase, ".png")
-  ggsave(file=ggplotname, width=width, height=height, units = c("cm"))
+  ggplotname <- paste0(tPath,"plot ", interest.variable, "vsT_vaisala-", name.seePhase.phase, ".png")
+  ggsave(file=ggplotname)
   
 # # Plot the data as a function of time
 #   ### Still need to add temperature series to the time.series
