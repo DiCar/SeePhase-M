@@ -1,39 +1,37 @@
-dataFilePath = "C:\Users\pdicarmine\Documents\GitHub\SeePhase-M\IS01_160224T01copy\prc02_24_2016___05_39_07PM.csv"
-vdsFilePath = "C:\Users\pdicarmine\Documents\GitHub\SeePhase-M\IS01_160224T01copy\FakeTestSequence.txt" #let it be in the Tab Delimited format, must have two extra columns (include and Temp in columns O and P, respectively)
-vaisala.file.path = "C:\Users\pdicarmine\Documents\GitHub\SeePhase-M\IS01_160224T01copy\Vaisala_IS_160224T01-2.txt"
+process.type = '3'
 
-#data refers to the raw file from seephase
+#use 1 for CO2 process
+#use 2 for O2
+#use 3 for RH
+
+dataFilePath = "S:\R&D Docs\R&D Shared\4125 LMA MASK\Data\SYS01\SYS01_160320T01 - RH study\prc03_20_2016___02_49_17PM.csv"
+vdsFilePath = "S:\R&D Docs\R&D Shared\4125 LMA MASK\Data\SYS01\SYS01_160320T01 - RH study\Copies for R script\SYS01 Test 03 - 18, 19, 20, 24 & 25-copy for TestID 2.1.25.txt"
+vaisala.file.path = "S:\R&D Docs\R&D Shared\4125 LMA MASK\Data\SYS01\SYS01_160320T01 - RH study\Copies for R script\2016-03-20 13_59 - Copy.txt"
 
 seePhase.time = 1 #this is the first column for the SeePhase
-seePhase.temperature = 17 #this is the column for the 'AnalogB' column for CO2
-seePhase.phase = 2 #this is the column of the dependant (measured) variable (eg. Ph1, Ph2, Ph3, or Ph4 for the SeePhase)
+seePhase.temperature = 12 #this is the column for the 'Analog' column for CO2
+seePhase.phase = 4 #this is the column of the dependant (measured) variable (eg. Ph1, Ph2, Ph3, or Ph4 for the SeePhase)
 
 #vds refers to the time sequence to run the vds
 
-vds.num.columns.keep = 17 #this is the number of columns to keep for the VDS
-vds.rh = 14 #RH column for VDS column
-vds.temperature = 16 #Temp column for VDS column
-vds.cCO2 = 12 #CO2 concentration column for VDS
-vds.cO2 = 15 #O2 concentration column for VDS
+vds.num.columns.keep = 34 #this is the number of columns to keep for the VDS
+vds.rh = 32 #RH column for VDS column
+vds.temperature = 33 #Temp column for VDS column
+vds.cCO2 = 27 #CO2 concentration column for VDS
+vds.cO2 = 30 #O2 concentration column for VDS
 vds.time = 1 #this is the first column for the TimeSequence VDS
-
-vds.include = 17 #column to choose what goes into the cycle
-#tells the software where the "include" column is in your VDS spreadsheet
+vds.flow = 28 # flow rate
+vds.gastype = 29
+vds.include = 34 #column to choose what goes into the cycle #tells the software where the "include" column is in your VDS spreadsheet
 
 vaisala.RH = 3
 vaisala.temperature = 4
 vaisala.pwater = 5
 
-interest.variable = "RH" # Indicates the name of the analyte. Input “RH”, “O2”, “CO2”.
-
 include.check = 0
 #use 0 for all include above 1
 #use n to filter out rows with n assigned to include
 
-process_type = '1'
-
-#use 1 for CO2 process
-#use 2 for RH, O2 process
 
 # Plot Details #
 # Enter the desired aspect ratio for the plots in the form x/y
@@ -43,6 +41,4 @@ width <- 15
 height <- 15
 
 ###Notes for Paul###
-# Vaisala data needs a column labeled elapsedTimeSec, and vaisalaTemperature
-
-
+# Vaisala data needs a column labeled elapsedTimeSec, and vaisalaTemp
