@@ -1,0 +1,14 @@
+mainFunction-5.R 
+is a good working stable version of the script. It can be used for processing CO2, RH, and O2 data
+It was used for most data processed in March 2016. 
+Data processed before that data would have been processed with similar code, though not exactly the same. The code was always evolving.
+This is a snapshot of the code, kept as backup for traceability. i.e. incase any problems are found, or processed data is deleted and needs to be re-processed in the same way.
+This version is being backed up because the code is about to be purged of unnecessary lines, comments, etc.
+New features will be implemented after the purging.
+This code is being saved for traceability in case any of the changes alter the behaviour of the script.
+
+mainFunction.R 
+is the same or pretty similar to the original code provided by Marvin Lav.
+
+mainFunction-2.R and above, until mainFunction-5.R
+are itterations on the way to mainFunction-5.R

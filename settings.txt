@@ -1,29 +1,30 @@
 process.type = '3'
 
-#use 1 for CO2 process
-#use 2 for O2
-#use 3 for RH
+# use 1 for CO2 process
+# use 2 for O2
+# use 3 for RH
 
-dataFilePath = "S:\R&D Docs\R&D Shared\4125 LMA MASK\Data\SYS01\SYS01_160320T01 - RH study\prc03_20_2016___02_49_17PM.csv"
-vdsFilePath = "S:\R&D Docs\R&D Shared\4125 LMA MASK\Data\SYS01\SYS01_160320T01 - RH study\Copies for R script\SYS01 Test 03 - 18, 19, 20, 24 & 25-copy for TestID 2.1.25.txt"
-vaisala.file.path = "S:\R&D Docs\R&D Shared\4125 LMA MASK\Data\SYS01\SYS01_160320T01 - RH study\Copies for R script\2016-03-20 13_59 - Copy.txt"
+dataFilePath = "S:\R&D Docs\R&D Shared\4125 LMA MASK\Data\SYS01\SYS01_160331T02\prc03_31_2016___07_51_01PM.csv"
+vdsFilePath = "S:\R&D Docs\R&D Shared\4125 LMA MASK\Data\SYS01\SYS01_160331T02\Copies for R script\CAL TEST03 - RH b - copy.txt" #let it be in the Tab Delimited format, must have two extra columns (include and Temp in columns O and P, respectively)
+vaisala.file.path = "S:\R&D Docs\R&D Shared\4125 LMA MASK\Data\SYS01\SYS01_160331T02\Copies for R script\Vaisala RH - copy.txt"
 
+# Enter the column numbers in which the data is found #
 seePhase.time = 1 #this is the first column for the SeePhase
-seePhase.temperature = 12 #this is the column for the 'Analog' column for CO2
+seePhase.temperature = 12 #this is the 'Analog' column
 seePhase.phase = 4 #this is the column of the dependant (measured) variable (eg. Ph1, Ph2, Ph3, or Ph4 for the SeePhase)
 
-#vds refers to the time sequence to run the vds
+# Enter the column numbers in which the VDS controlling input data is found #
+vds.num.columns.keep = 34 #this is the number of columns to keep from the VDS text file (cut off unnecessary columns)
+vds.rh = 32 # RH column for VDS
+vds.temperature = 33 # Temperature column for VDS
+vds.cCO2 = 30 # CO2 concentration column for VDS
+vds.cO2 = 27 # O2 concentration column for VDS
+vds.time = 1 # This must be the the first column in the VDS input data file (if not, change the input file)
+vds.flow = 28 # Flow rate column for VDS
+vds.gastype = 29 # The gastype column for VDS
+vds.include = 34 # Additional column, titled "Include", added manually to the VDS input file, to choose which steps in the sequence provide data to be extracted by the script
 
-vds.num.columns.keep = 34 #this is the number of columns to keep for the VDS
-vds.rh = 32 #RH column for VDS column
-vds.temperature = 33 #Temp column for VDS column
-vds.cCO2 = 27 #CO2 concentration column for VDS
-vds.cO2 = 30 #O2 concentration column for VDS
-vds.time = 1 #this is the first column for the TimeSequence VDS
-vds.flow = 28 # flow rate
-vds.gastype = 29
-vds.include = 34 #column to choose what goes into the cycle #tells the software where the "include" column is in your VDS spreadsheet
-
+# Enter the column numbers in which the Vaisala data is found #
 vaisala.RH = 3
 vaisala.temperature = 4
 vaisala.pwater = 5

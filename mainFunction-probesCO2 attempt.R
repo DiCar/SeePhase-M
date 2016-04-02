@@ -399,18 +399,20 @@ if (process.type == '2' | process.type =='3'){
   ggplotname <- paste0(tPath,"plot ", interest.variable, "vsT_probes-", name.seePhase.phase, ".png")
   ggsave(file=ggplotname, width=width, height=height, units = c("cm"))
   
-# # Plot the data as a function of time
-#   ### Still need to add temperature series to the time.series
-#   ### Should be able to do this with aggregate(), but need seePhase and VDS data in one df
-#   time.series <- aggregate(Ph1 ~ elapsedTimeSec, data = seePhase2, sum)
-#   plotId <- paste(name.seePhase.phase, "vs Time with Temperature Series")
-#   #plot(time.series, type = 'l')
-#   time.series.plot <- ggplot(time.series, aes(elapsedTimeSec, Ph1)) +
-#     geom_line() + 
-#     ggtitle(plotId) + xlab('Time') + ylab(name.seePhase.phase)
-#   print(time.series.plot)
-#   ggplotname <- paste0(tPath,"plot_DataVsTime.png")
-#   ggsave(file=ggplotname)
+# Plot the data as a function of time
+  ### Still need to add temperature series to the time.series
+  ### Should be able to do this with aggregate(), but need seePhase and VDS data in one df
+  time.series <- aggregate(Ph2 ~ elapsedTimeSec + Analog, data = seePhase2, sum)
+  plotId <- paste(name.seePhase.phase, "vs Time with Temperature Series")
+  #plot(time.series, type = 'l')
+  time.series.plot <- ggplot(time.series, aes(elapsedTimeSec, Ph2)) +
+    geom_line(aes(colour = Analog)) +
+    scale_colour_gradient(limits=c(3, 34), low="blue", high = "red") +
+
+    ggtitle(plotId) + xlab('Time') + ylab(name.seePhase.phase)
+  print(time.series.plot)
+  ggplotname <- paste0(tPath,"plot_DataVsTime.png")
+  ggsave(file=ggplotname)
 
   #Make a copy of the settings file and place in processed data directory
   file.copy('settings.txt',tPath)

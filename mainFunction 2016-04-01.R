@@ -1,3 +1,6 @@
+# Version Number:
+version.number <- "mainFunction 2016-04-01.R"
+
 # main file
 # Styling notes:
 # Any programming notes that are to be deleted once some function/feature is implemented
@@ -12,21 +15,33 @@
 
 # Import required packages (PMD)
 source('helperFunctions.R')
-require(reshape2)
-require(ggplot2)
-require(manipulate) #allows the creation of an interactive plot
+library(reshape2)
+library(ggplot2)
+library(manipulate) #allows the creation of an interactive plot
 
 # Define global variables (PMD)
+settings.file <- "settings.txt"
 t <- Sys.time()
 timeStamp <-  strftime(t,"%Y-%m-%d_%H-%M-%S")
 
 # The Script
-settings.lines <- readLines('settings.txt') #reads the lines of the settings file into a character vector (PMD)
+settings.lines <- readLines(settings.file) #reads the lines of the settings file into a character vector (PMD)
 
 for (i in 1:length(settings.lines)){
   temp <- gsub("\\","/",settings.lines[i],fixed=TRUE)
   eval(parse(text=temp))
 }
+
+#Set the interest variable
+if (process.type == '1'){
+  interest.variable <- "CO2"
+}
+if (process.type == '2'){
+  interest.variable <- "O2"
+}
+if (process.type == '3'){
+  interest.variable <- "RH"
+}   
 
 # Load VDS file into a list, vds
 vds <- read.delim(vdsFilePath)
@@ -72,6 +87,8 @@ name.vds.cCO2 = colnames(vds2)[vds.cCO2] #returns 'Concentration.of.Gas...'(PMD)
 name.vds.cO2 = colnames(vds2)[vds.cO2] #returns 'elapsed.time'...should return O2 concentration (PMD)
 name.vds.time = colnames(vds2)[vds.time] #returns 'time.s.' (PMD)
 name.vds.include = colnames(vds2)[vds.include] #returns 'Include' (PMD)
+name.vds.gastype = colnames(vds2)[vds.gastype]
+name.vds.flowrate = colnames(vds2)[vds.flow]
 name.vaisala.RH = colnames(vaisala)[vaisala.RH]
 name.vaisala.temperature = colnames(vaisala)[vaisala.temperature]
 name.vaisala.pwater = colnames(vaisala)[vaisala.pwater]
@@ -110,8 +127,8 @@ if (line == '1'){stop("user stopped script")}
 print(offset_value_main)
 data35 <- extracting_points_offset(seePhase2, elapsed.time, offset_value_main) #grabs only the values at the offset points on the graph, cuts out much of the data rows
 data355 <- extracting_points_offset(vaisala, elapsed.time, offset_value_main)
-data36 <- cbind(data35,vds2) #combines SeePhase and VDS data into one list (PMD)
-data365 <- cbind(data35,vds2, data355)
+data36 <- cbind(data35,vds2) #combines SeePhase and VDS data into one list (delete line, PMD)
+data365 <- cbind(data35,vds2, data355) #combines SeePhase, vaisala, and VDS data into one list (PMD)
 ###################TEST INTERACTIVE PLOT FOR VAISALA DATA###########################
 # #need to generate a data frame where the time variable is changed by the offset value
 # linegraph_offset2 <- function(variableRH, time, offset){
@@ -156,18 +173,9 @@ data365 <- cbind(data35,vds2, data355)
 
 #####################################################################################
 
-#comparing the results to those from sigmaplot
-#data4 <- read.csv("diff.csv")
-#points(data4$hour,data4$ph3,col='blue')
-
-#making the table
-
-#garbage data, since I don't have the timestamps to line everything up
-
-
 #Removes many of the columns from data36
 #tf2 <- data36[c(name.seePhase.phase,name.seePhase.temperature,name.vds.include,name.vds.temperature,name.vds.rh,name.vds.cO2)]
-tf2 <- data365[c(name.seePhase.phase,name.seePhase.temperature,name.vds.include,name.vds.temperature,name.vds.rh,name.vds.cO2, name.vaisala.RH, name.vaisala.temperature, name.vaisala.pwater)]
+tf2 <- data365[c(name.seePhase.phase,name.seePhase.temperature,name.vds.include,name.vds.temperature,name.vds.flowrate, name.vds.rh,name.vds.cO2, name.vds.gastype, name.vds.cCO2, name.vaisala.RH, name.vaisala.temperature, name.vaisala.pwater)]
 
 #Assign the column number of name.vds.include to a variable
 include.index <- grep(name.vds.include,colnames(tf2))
@@ -199,22 +207,93 @@ dir.name <- paste(timeStamp, name.seePhase.phase)
 dir.create(dir.name)
 tPath <- paste0(dir.name,"/")
 
+#########################################   WORKING AREA   #######################################################
+##################################################################################################################
+##################################################################################################################
+
 #runs this code if CO2 experiement (Haven't worked on this yet, PMD)
-#deleted the script for readability, re-insert once process_type 2 is working as desired
-if (process_type == '2'){
+if (process.type == '1'){
+  # Split the table of selected points into separate tables based on temperature value
+  e1<- split(tf4, tf4[,vds.temperature.index])
+  
+  write("TablePlot",file=paste0(tPath,"table_averaged.csv"))
+  write("---------",file=paste0(tPath,"table_averaged.csv"),append=TRUE)
+  
+  ttPath <- paste0(tPath,"pieces/")
+  dir.create(ttPath)
+  
+  # Loop through each table created by the split
+  for (i in 1:length(e1)){
+    print(i)
+    
+    x_text = "table_check <- dcast(e1[[i]], AAAA1111 ~ BBBB2222, length, value.var='CCCC3333')"
+    x_text = sub("AAAA1111",name.vds.cCO2,x_text)
+    x_text = sub("BBBB2222",name.vds.rh,x_text)
+    x_text = sub("CCCC3333",name.seePhase.phase,x_text)
+    #table_check2 <- dcast(e1[[i]], name.vds.cCO2 ~ name.vds.rh, length, value.var="Ph1")
+    eval(parse(text=x_text))
+    
+    print(table_check)
+    write.csv(table_check,paste0(ttPath,"check_table",names(e1)[i],".csv"),row.names=FALSE)
+    
+    x_text2 = "table_averaged <- dcast(e1[[i]], AAAA1111 ~ BBBB2222, mean, value.var='CCCC3333')"
+    x_text2 = sub("AAAA1111",name.vds.cCO2,x_text2)
+    x_text2 = sub("BBBB2222",name.vds.rh,x_text2)
+    x_text2 = sub("CCCC3333",name.seePhase.phase,x_text2)
+    #table_averaged <- dcast(e1[[i]], concentration.co2 ~ rh, mean, value.var="Ph4")
+    eval(parse(text=x_text2))
+    
+    print(table_averaged)
+    
+    # Write the table to the "pieces" folder
+    write.csv(table_averaged,paste0(ttPath,"averaged_table",names(e1)[i],".csv"),row.names=FALSE)
+    
+    # Write/append the table to the main table_averaged file, with a heading and spacer ------
+    write(paste0("Temperature",names(e1)[i]),file=paste0(tPath,"table_averaged.csv"),append=TRUE) #soft code the splitting variable
+    write("---------",file=paste0(tPath,"table_averaged.csv"),append=TRUE)
+    write.table(table_averaged,paste0(tPath,"table_averaged.csv"),sep=",",append=TRUE,row.names=FALSE)
+    
+    t_plot <- melt(table_averaged, id.vars = name.vds.cCO2, variable.name = 'series')
+    number <- names(e1)[i]
+    plotId <- paste0("CO2 vs RH vs Temperature Plot for ",number)
+    g <- ggplot(t_plot, aes_string(name.vds.cCO2,"value")) + 
+      geom_point(aes(colour = series)) + 
+      geom_line(aes(colour = series)) +
+      ggtitle(plotId)+xlab('CO2 Concentration')+ylab('Phase')
+    print(g)
+    ggplotname <- paste0(ttPath,"plot_forTemperature_",names(e1)[i],".png")
+    ggsave(file=ggplotname)
+    
+  }
+}
+
+#########################################   END WORKING AREA   #######################################################
+##################################################################################################################
+##################################################################################################################
+
+if (process.type == '2' | process.type =='3'){
+  
+  if (process.type == '2'){
+    calibration.gas <- name.vds.cO2
+  }
+  if (process.type == '3'){
+    calibration.gas <- name.vds.rh
+  }
+  
 
 ###Works for nominal vds data###
   x_text = "table.check.vds <- dcast(tf4, AAAA1111 ~ BBBB2222, length, value.var='CCCC3333')"
-  x_text = sub("AAAA1111",name.vds.rh,x_text) #CHANGED NAME.VDS.RH TO O2 HERE ###NEED TO SOFT CODE THIS
+  x_text = sub("AAAA1111",calibration.gas,x_text) #CHANGED NAME.VDS.RH TO O2 HERE ###NEED TO SOFT CODE THIS
   x_text = sub("BBBB2222",name.vds.temperature,x_text)
   x_text = sub("CCCC3333",name.seePhase.phase,x_text)
   eval(parse(text=x_text))
+  
   
   print(table.check.vds) #allows user to verify that the correct data is being used
   write.csv(table.check.vds, paste0(tPath, interest.variable, "_check_table_nominal.csv"),row.names=FALSE)
   
   x_text2 = "table.selectedpoints.vds <- dcast(tf4, AAAA1111 ~ BBBB2222, mean, value.var='CCCC3333')"
-  x_text2 = sub("AAAA1111",name.vds.rh,x_text2) #CHANGED FROM RH FOR MY O2 FULL CALIBRATION ###NEED TO SOFT CODE THIS
+  x_text2 = sub("AAAA1111",calibration.gas,x_text2) #CHANGED FROM RH FOR MY O2 FULL CALIBRATION ###NEED TO SOFT CODE THIS
   x_text2 = sub("BBBB2222",name.vds.temperature,x_text2)
   x_text2 = sub("CCCC3333",name.seePhase.phase,x_text2)
   eval(parse(text=x_text2))
@@ -222,16 +301,17 @@ if (process_type == '2'){
   print(table.selectedpoints.vds)
   write.csv(table.selectedpoints.vds,paste0(tPath, interest.variable, "_selectedpoints_table_nominal.csv"),row.names=FALSE)
   
-  t_plot <- melt(table.selectedpoints.vds, id.vars = name.vds.rh, variable.name = 'series') #CHANGED ID.VARS HERE FOR O2 FULL CALIBRATION ###NEED TO SOFT CODE THIS
+  t_plot <- melt(table.selectedpoints.vds, id.vars = calibration.gas, variable.name = 'series') #CHANGED ID.VARS HERE FOR O2 FULL CALIBRATION ###NEED TO SOFT CODE THIS
+  t_plot <- t_plot[!is.na(t_plot[3]),] #removes rows with empty cells in column 3, i.e. if data wasn't collected for some gas concentration/humidity combination
   df <- t_plot
-  x <- name.vds.rh
+  x <- calibration.gas  ###NEED TO SOFT CODE THIS
   y <- "value"
   
   ratio.normalized <- (max(df[x])-min(df[x]))/(max(df[y])-min(df[y]))
   ratio.plot <- ratio.normalized/ratio.aspect
 
   plotId <- paste(name.seePhase.phase, "vs", interest.variable, "with Temperature Series\nNominal Variable Values")
-  variable.series.plot <- ggplot(t_plot, aes_string(name.vds.rh,"value")) + #CHANGED RH TO O2 HERE ###NEED TO SOFT CODE THIS
+  variable.series.plot <- ggplot(t_plot, aes_string(calibration.gas,"value")) + #CHANGED RH TO O2 HERE ###NEED TO SOFT CODE THIS
     geom_point(aes(colour = series)) + 
     ggtitle(plotId) + xlab(paste(interest.variable, '(%)')) + ylab(name.seePhase.phase) +
     coord_fixed(ratio.plot)
@@ -239,7 +319,7 @@ if (process_type == '2'){
   ggplotname <- paste0(tPath,"plot ", interest.variable, "vsT_nominal-", name.seePhase.phase, ".png")
   ggsave(file=ggplotname, width=width, height=height, units = c("cm"))
 
-#This is for real temperature (AnalogB) and RH (Vaisala) data  
+#This is for real temperature (Analog) and RH (Vaisala) data  
   x_text = "table.check.probes <- aggregate(CCCC3333 ~ AAAA1111 + BBBB2222, data = tf4, length)"
   x_text = sub("AAAA1111",name.vaisala.RH,x_text) #CHANGED NAME.VDS.RH TO O2 HERE ###NEED TO SOFT CODE THIS
   x_text = sub("BBBB2222",name.seePhase.temperature,x_text)
@@ -249,7 +329,7 @@ if (process_type == '2'){
   print(table.check.probes) #allows user to verify that the correct data is being used
   write.csv(table.check.probes, paste0(tPath, interest.variable, "_check_table_probes.csv"),row.names=FALSE)
   
-  x_text2 = "table.selectedpoints.probes <- aggregate(CCCC3333 ~ AAAA1111 + BBBB2222, data = tf4, mean)"
+  x_text2 = "table.selectedpoints.probes <- aggregate(CCCC3333 ~ BBBB2222 + AAAA1111 + Temperature, data = tf4, mean)"
   x_text2 = sub("AAAA1111",name.vaisala.RH,x_text2) #CHANGED FROM RH FOR MY O2 FULL CALIBRATION ###NEED TO SOFT CODE THIS
   x_text2 = sub("BBBB2222",name.seePhase.temperature,x_text2)
   x_text2 = sub("CCCC3333",name.seePhase.phase,x_text2)
@@ -267,7 +347,7 @@ if (process_type == '2'){
  
   plotId <- paste(name.seePhase.phase, "vs", interest.variable, "with Temperature Series\nProbe Variable Values")
   variable.series.plot <- ggplot(df, aes_string(name.vaisala.RH, name.seePhase.phase)) + #CHANGED RH TO O2 HERE ###NEED TO SOFT CODE THIS
-    geom_point(aes(colour = AnalogB)) +
+    geom_point(aes(colour = Analog)) +
     scale_colour_gradient(limits=c(3, 34), low="blue", high = "red") +
     ggtitle(plotId) + xlab(paste(interest.variable, '(%)')) + ylab(name.seePhase.phase) +
     coord_fixed(ratio.plot)
@@ -275,28 +355,43 @@ if (process_type == '2'){
   ggplotname <- paste0(tPath,"plot ", interest.variable, "vsT_probes-", name.seePhase.phase, ".png")
   ggsave(file=ggplotname, width=width, height=height, units = c("cm"))
   
-# # Plot the data as a function of time
-#   ### Still need to add temperature series to the time.series
-#   ### Should be able to do this with aggregate(), but need seePhase and VDS data in one df
-#   time.series <- aggregate(Ph1 ~ elapsedTimeSec, data = seePhase2, sum)
-#   plotId <- paste(name.seePhase.phase, "vs Time with Temperature Series")
-#   #plot(time.series, type = 'l')
-#   time.series.plot <- ggplot(time.series, aes(elapsedTimeSec, Ph1)) +
-#     geom_line() + 
-#     ggtitle(plotId) + xlab('Time') + ylab(name.seePhase.phase)
-#   print(time.series.plot)
-#   ggplotname <- paste0(tPath,"plot_DataVsTime.png")
-#   ggsave(file=ggplotname)
+# Plot the data as a function of time
+  ### Still need to add temperature series to the time.series
+  ### Should be able to do this with aggregate(), but need seePhase and VDS data in one df
+  time.series <- aggregate(Ph2 ~ elapsedTimeSec + Analog, data = seePhase2, sum)
+  plotId <- paste(name.seePhase.phase, "vs Time with Temperature Series")
+  #plot(time.series, type = 'l')
+  time.series.plot <- ggplot(time.series, aes(elapsedTimeSec, Ph2)) +
+    geom_line(aes(colour = Analog)) +
+    scale_colour_gradient(limits=c(3, 34), low="blue", high = "red") +
+    ggtitle(plotId) + xlab('Time') + ylab(name.seePhase.phase)
+  print(time.series.plot)
+  ggplotname <- paste0(tPath,"plot_DataVsTime.png")
+  ggsave(file=ggplotname)
 
-  #Make a copy of the settings file and place in processed data directory
-  file.copy('settings.txt',tPath)
-  
-  #add the offset value and process type used to the new settings file
-  write(paste0("offset_value_main = ",offset_value_main," #used for this set of run"),file=paste0(tPath,"settings.txt"),append=TRUE)
-  write(paste0("process_type = ",process_type," #used for this set of run"),file=paste0(tPath,"settings.txt"),append=TRUE)
-  write.csv(tf4,paste0(tPath,"selectedpoints.csv"),col.names=FALSE)
-  write.csv(seePhase2,paste0(tPath,"rawdata.csv"),col.names=FALSE)
-  
-  
-  
+# Plot the Vaisala data as a function of time
+  time.series <- aggregate(vaisalaRH ~ elapsedTimeSec + vaisalaTemp, data = vaisala, sum)
+  plotId <- paste(name.vaisala.RH, "vs Time with Temperature Series")
+  #plot(time.series, type = 'l')
+  time.series.plot <- ggplot(time.series, aes(elapsedTimeSec, vaisalaRH)) +
+    geom_line(aes(colour = vaisalaTemp)) +
+    scale_colour_gradient(limits=c(3, 34), low="blue", high = "red") +
+    ggtitle(plotId) + xlab('Time') + ylab(name.vaisala.RH)
+  print(time.series.plot)
+  ggplotname <- paste0(tPath,"plot_VaisalaRHvsTime.png")
+  ggsave(file=ggplotname)
+
 }
+
+#Make a copy of the settings file and place in processed data directory
+file.copy(settings.file,tPath)
+  
+#add the offset value and process type used to the new settings file
+write(paste0("\n### Post processing notes. \n# Script version used: ", version.number, "\noffset_value_main = ",offset_value_main," # was used for this run"),
+      file=paste0(tPath, settings.file),append=TRUE)
+write(paste0("process.type = ",process.type," #was used for this run"),file=paste0(tPath, settings.file),append=TRUE)
+write.csv(tf4,paste0(tPath,"selectedpoints.csv"),col.names=FALSE)
+write.csv(seePhase2,paste0(tPath,"rawdata.csv"),col.names=FALSE)
+  
+  
+
